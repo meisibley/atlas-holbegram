@@ -18,26 +18,35 @@
 // }
 import React, { useState } from "react";
 import { View, StyleSheet, Text, Image, TextInput, TouchableOpacity } from "react-native";
-import { Link } from 'expo-router';
+import { Link, useRouter } from 'expo-router';
 import { Colors } from "@/constants/Colors";
-//import Loading from "@/components/Loading";
+import { useAuth } from "@/components/AuthProvider";
+import Loading from "@/components/Loading";
 //import { CreateNewAccountLink, SignInButton } from "@/components/Buttons";
 
 export default function Page() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [loading, setLoading] = useState(false);
+    const auth = useAuth();
+    const router = useRouter();
 
-    function login() {
-        alert(`Logging in with ${email} and ${password}`);
+    async function login() {
+        setLoading(true);
+        try {
+            await auth.login(email, password);
+            router.replace("/(tabs)/");
+        } catch(err) {
+            alert(`Email ${email} or password ${password} is incorrect`);
+        }
+        setLoading(false);
     }
 
     return (
         <View style={styles.container}>
             <Image source={require('../assets/images/logo.png')} style={styles.logo} />
             <Text style={styles.header}>Login</Text>
-            {/* <CreateNewAccountLink />
-            {loading && <Loading />} */}
+            {/* <CreateNewAccountLink /> */}
 
             <TextInput
                 style={styles.input}
@@ -66,6 +75,7 @@ export default function Page() {
             <Link href="/register" replace>
                 <Text style={styles.text}>Create a new account</Text>
             </Link>
+            {loading && <Loading />}
         </View>
     );
 }
@@ -107,6 +117,7 @@ const styles = StyleSheet.create({
         borderColor: '#069494',
         backgroundColor: 'transparent',
         fontSize: 16,
+        color: '#fff',
     },
     button: {
         width: '80%',
